@@ -28,9 +28,7 @@ class Inv5K(Commander):
         self.num_nodes = 1
 
     def add_options(self, parser):
-        parser.description = (
-            "Demonstrate INV attack using a scenario and P2PInterface"
-        )
+        parser.description = "Demonstrate INV attack using a scenario and P2PInterface"
         parser.usage = "warnet run /path/to/my_first_attack_5kinv.py"
 
     # Scenario entrypoint
@@ -38,7 +36,7 @@ class Inv5K(Commander):
         # We pick a node on the network to attack
         # We know this one is vulnderable to 5k inv messages based on it's subver
         # Change this to your teams colour if running in the battleground
-        victim = "TARGET_TANK_NAME.default.svc"
+        victim = "tank-0000-red"
 
         # regtest or signet
         chain = self.nodes[0].chain
