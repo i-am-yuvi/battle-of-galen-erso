@@ -94,7 +94,7 @@ class MempoolFull(Commander):
         msg = msg_tx(tx)
 
         # Send multiple transactions
-        for i in range(5001):
+        for i in range(6001):
             # Modify the transaction slightly for each iteration to create unique txids
             tx.vin[0].prevout.n = i
             tx.rehash()

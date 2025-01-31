@@ -66,19 +66,12 @@ class Orphan50(Commander):
 
         # We pick a node on the network to attack
         # Find the node that is vulnerable to 50 orphans on fork-observer
-        victim = "TARGET_TANK_NAME.default.svc"
-
-        # regtest or signet
-        chain = self.nodes[0].chain
+        victim = "tank-0013-blue.default.svc"
 
         # The victim's address could be an explicit IP address
         # OR a kubernetes hostname (use default chain p2p port)
         dstaddr = socket.gethostbyname(victim)
-        if chain == "regtest":
-            dstport = 18444
-        if chain == "signet":
-            dstport = 38333
-            MAGIC_BYTES["signet"] = get_signet_network_magic_from_node(self.nodes[0])
+        dstport = 38333
 
         # Now we will use a python-based Bitcoin p2p node to send very specific,
         # unusual or non-standard messages to a "victim" node.

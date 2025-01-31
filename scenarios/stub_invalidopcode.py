@@ -50,7 +50,7 @@ class Corn(Commander):
         # warnet run scenarios/miner_std.py --debug -- --interval=1
 
         node = self.nodes[0]
-        victim = "TARGET_TANK_NAME.default.svc"
+        victim = "tank-0015-blue.default.svc"
 
         addr = socket.gethostbyname(victim)
         MAGIC_BYTES["signet"] = get_signet_network_magic_from_node(self.nodes[0])
@@ -66,7 +66,7 @@ class Corn(Commander):
 
         # FILL ME IN
         # PERHAPS WITH A FELINE OP_CODE??
-        script = CScript([])
+        script = CScript([OP_INVALIDOPCODE])
 
         p2sh_address = script_to_p2sh(script)
         txid = node.sendtoaddress(p2sh_address, 0.0001)

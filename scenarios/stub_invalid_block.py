@@ -44,7 +44,7 @@ class InvalidBlock(Commander):
             if message:
                 [print(f"Peer: {addr.ip}, Port: {addr.port}") for addr in message.addrs]
 
-        victim = "TARGET_TANK_NAME.default.svc"
+        victim = "tank-0012-blue.default.svc"
 
         # regtest or signet
         chain = self.nodes[0].chain
@@ -76,7 +76,7 @@ class InvalidBlock(Commander):
             coinbase=coinbase,
             ntime=best_block_time + 1,
         )
-        # new_block.solve()
+        new_block.solve()
         new_block.hashMerkleRoot = 0xDEADBEEF
         msg = msg_block(new_block)
 

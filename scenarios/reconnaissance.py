@@ -28,7 +28,9 @@ class Reconnaissance(Commander):
         self.num_nodes = 1
 
     def add_options(self, parser):
-        parser.description = "Demonstrate network reconnaissance using a scenario and P2PInterface"
+        parser.description = (
+            "Demonstrate network reconnaissance using a scenario and P2PInterface"
+        )
         parser.usage = "warnet run /path/to/reconnaissance.py"
 
     # Scenario entrypoint
@@ -47,7 +49,7 @@ class Reconnaissance(Commander):
             self.log.info(f"{peer['addr']} {peer['subver']}")
 
         # We pick a node on the network to attack
-        victim = "tank-0000-red.default.svc"
+        victim = "tank-0012-blue.default.svc"
 
         # regtest or signet
         chain = self.nodes[0].chain
@@ -63,13 +65,10 @@ class Reconnaissance(Commander):
 
         # Now we will use a python-based Bitcoin p2p node to send very specific,
         # unusual or non-standard messages to a "victim" node.
-        self.log.info(f"Attacking tank-0000-red.default.svc")
+        self.log.info(f"Attacking default.svc")
         attacker = P2PInterface()
         attacker.peer_connect(
-            dstaddr=dstaddr,
-            dstport=dstport,
-            net="signet",
-            timeout_factor=1
+            dstaddr=dstaddr, dstport=dstport, net="signet", timeout_factor=1
         )()
         attacker.wait_until(lambda: attacker.is_connected, check_connected=False)
 

